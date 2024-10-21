@@ -1,0 +1,14 @@
+﻿@model Shop.Models.Product
+@{
+    ViewData["Title"] = "Delete Product";
+}
+
+<h3>Delete Product</h3>
+
+<form asp-action="DeleteConfirmed" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <p>Are you sure you want to delete: <strong>@Model.Name</strong>?</p>
+    <button type="submit">Delete</button>
+    <a asp-action="Index">Cancel</a>
+</form>

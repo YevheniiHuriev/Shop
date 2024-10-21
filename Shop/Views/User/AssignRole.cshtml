@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Assign Role";
+}
+<form asp-controller="User" asp-action="AssignRole" method="post">
+    <label class="form-label" for="id">Id:</label>
+    <input class="form-control" type="text" id="id" name="id" required />
+    <br />
+    <label class="form-label" for="roleName">Role name:</label>
+    <input class="form-control" type="text" id="roleName" name="roleName" required />
+    <br />
+    <button class="btn btn-success" type="submit">Assign Role</button>
+</form>

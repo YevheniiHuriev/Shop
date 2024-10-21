@@ -1,0 +1,24 @@
+﻿@model Shop.Models.Product
+@{
+    ViewData["Title"] = "Update Product";
+}
+
+<h3>Update Product</h3>
+
+<form asp-action="Update" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <div>
+        <label asp-for="Name"></label>
+        <input asp-for="Name" />
+    </div>
+    <div>
+        <label asp-for="Price"></label>
+        <input asp-for="Price" />
+    </div>
+    <div>
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description"></textarea>
+    </div>
+    <button type="submit">Оновити</button>
+</form>
