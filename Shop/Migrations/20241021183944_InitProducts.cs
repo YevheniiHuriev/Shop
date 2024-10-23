@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace mvc_app.Migrations.Product
+namespace Shop.Migrations
 {
     /// <inheritdoc />
     public partial class InitProducts : Migration
@@ -16,8 +16,8 @@ namespace mvc_app.Migrations.Product
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false)
                 },
                 constraints: table =>

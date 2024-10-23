@@ -10,6 +10,8 @@ namespace Shop
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddScoped<IServiceProduct, ServiceProduct>();
+
             builder.Services.AddDbContext<ProductContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -33,7 +35,19 @@ namespace Shop
                 options.Password.RequiredUniqueChars = 0;
             }).AddRoles<IdentityRole>().AddEntityFrameworkStores<UserContext>();
 
-            builder.Services.AddScoped<IServiceProduct, ServiceProduct>();
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+            });
+     
+            builder.Services.AddControllers();
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddMvc();
@@ -53,10 +67,14 @@ namespace Shop
             }
 
             app.UseRouting();
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++
+            app.UseCors("AllowAll");
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++
+
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseStaticFiles();
             //app.MapStaticAssets();
@@ -64,6 +82,11 @@ namespace Shop
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
             app.MapRazorPages();
+
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++
+            app.MapControllers();
+            // ++++++++++++++++++++++++++++++++++++++++++++++++++++
+
             //.WithStaticAssets();
 
             app.Run();

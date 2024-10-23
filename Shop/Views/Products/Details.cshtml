@@ -3,18 +3,24 @@
     ViewData["Title"] = "Details Product";
 }
 
-<h3>Detaila Product</h3>
+<h3>Details Page</h3>
+<hr>
 
-<div>
-    <label>Name:</label>
-    <p>@Model.Name</p>
-</div>
-<div>
-    <label>Price:</label>
-    <p>@Model.Price</p>
-</div>
-<div>
-    <label>Description:</label>
-    <p>@Model.Description</p>
-</div>
-<a asp-action="Index">Back to list</a>
+<table class="table table-primary">
+    <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Price</th>
+            <th scope="col">Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>@Model.Id</td>
+            <td>@Model.Name</td>
+            <td>@Model.Price</td>
+            <td>@Model.Description</td>
+        </tr>
+    </tbody>
+</table>

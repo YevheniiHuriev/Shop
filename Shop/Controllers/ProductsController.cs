@@ -17,18 +17,14 @@ namespace Shop.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var products = await _serviceProduct.Read();
+            var products = await _serviceProduct.ReadAsync();
             return View(products);
         }
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            var product = await _serviceProduct.GetProductById(id);
-            if(product == null)
-            {
-                return NotFound();
-            }
+            var product = await _serviceProduct.GetByIdAsync(id);
             return View(product);
         }
 
@@ -43,7 +39,7 @@ namespace Shop.Controllers
         {
             if(ModelState.IsValid)
             {
-                await _serviceProduct.Create(product);
+                _ = await _serviceProduct.CreateAsync(product);
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
@@ -60,7 +56,7 @@ namespace Shop.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _serviceProduct.Update(product);
+                _ = await _serviceProduct.UpdateAsync(id, product);
                 return RedirectToAction(nameof(Index));
             }
             return View(product);
@@ -75,12 +71,12 @@ namespace Shop.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var success = await _serviceProduct.Delete(id);
-            if (!success)
+            var result = await _serviceProduct.DeleteAsync(id);
+            if (result)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index));
+            return View();
         }
     }
 }
