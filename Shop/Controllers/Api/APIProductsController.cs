@@ -1,90 +1,92 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shop.Models;
+using Shop.Services;
 
 namespace Shop.Controllers.Api
 {
-
     [ApiController]
     [Route("api/[controller]")]
-    public class APIProductsController : BaseController
+    public class APIProductsController : ControllerBase
     {
-        private readonly ProductContext _productContext;
+        private readonly IServiceProduct _serviceProducts;
+        private readonly ILogger<APIProductsController> _logger;
 
-        public APIProductsController(ProductContext productContext)
+        public APIProductsController(IServiceProduct serviceProducts, ILogger<APIProductsController> logger)
         {
-            _productContext = productContext;
+            _serviceProducts = serviceProducts;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<IActionResult> ReadAsync()
+        public async Task<IActionResult> GetAllProducts()
         {
-            var products = await _productContext.Products.ToListAsync();
-            return SendResponse(products, "Products successfully found");
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateAsync([FromBody] Product product)
-        {
-            if (!ModelState.IsValid)
-            {
-                return SendError("Validation error", ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)));
-            }
-
-            _productContext.Products.Add(product);
-            await _productContext.SaveChangesAsync();
-
-            return SendResponse(product, "Product created successfully");
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAsync(int id)
-        {
-            var product = await _productContext.Products.FindAsync(id);
-            if (product == null)
-            {
-                return SendError("Product not found");
-            }
-
-            _productContext.Products.Remove(product);
-            await _productContext.SaveChangesAsync();
-
-            return SendResponse(product, "Product deleted successfully");
+            _logger.LogInformation("Fetching all products.");
+            var products = await _serviceProducts.ReadAsync();
+            return Ok(products);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetByIdAsync(int id)
+        public async Task<IActionResult> GetProductById(int id)
         {
-            var product = await _productContext.Products.FindAsync(id);
+            _logger.LogInformation($"Fetching product with ID: {id}");
+            var product = await _serviceProducts.GetByIdAsync(id);
             if (product == null)
             {
-                return SendError("Product not found");
+                _logger.LogWarning($"Product with ID {id} not found.");
+                return NotFound();
             }
-
-            return SendResponse(product, "Product found successfully");
+            return Ok(product);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAsync(int id, [FromBody] Product updatedProduct)
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct([FromBody] Product product)
         {
-            if (!ModelState.IsValid)
-            {
-                return SendError("Validation error", ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage)));
-            }
-
-            var product = await _productContext.Products.FindAsync(id);
             if (product == null)
             {
-                return SendError("Product not found");
+                _logger.LogError("CreateProduct: Product object is null.");
+                return BadRequest("Product object is null.");
             }
 
-            product.Name = updatedProduct.Name;
-            product.Price = updatedProduct.Price;
-            product.Description = updatedProduct.Description;
+            _logger.LogInformation("Creating a new product.");
+            var productCreated = await _serviceProducts.CreateAsync(product);
+            return CreatedAtAction(nameof(GetProductById), new { id = productCreated.Id }, productCreated);
+        }
 
-            await _productContext.SaveChangesAsync();
+        [Authorize(Roles = "admin")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product product)
+        {
+            if (product == null)
+            {
+                _logger.LogError("UpdateProduct: Product object is null.");
+                return BadRequest("Product object is null.");
+            }
 
-            return SendResponse(product, "Product updated successfully");
+            _logger.LogInformation($"Updating product with ID: {id}");
+            var productUpdated = await _serviceProducts.UpdateAsync(id, product);
+            if (productUpdated == null)
+            {
+                _logger.LogWarning($"Product with ID {id} not found for update.");
+                return NotFound();
+            }
+            return Ok(productUpdated);
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            _logger.LogInformation($"Deleting product with ID: {id}");
+            var deleted = await _serviceProducts.DeleteAsync(id);
+            if (!deleted)
+            {
+                _logger.LogWarning($"Product with ID {id} not found for deletion.");
+                return NotFound();
+            }
+            return Ok(new { message = "Product deleted successfully." });
         }
     }
 }

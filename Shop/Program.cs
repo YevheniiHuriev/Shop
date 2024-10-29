@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shop.Services;
@@ -24,7 +25,7 @@ namespace Shop
 
             builder.Services.AddSession();
 
-            builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+            builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedEmail = true;
                 options.Password.RequireNonAlphanumeric = false;
@@ -33,7 +34,14 @@ namespace Shop
                 options.Password.RequireUppercase = false;
                 options.Password.RequiredLength = 4;
                 options.Password.RequiredUniqueChars = 0;
-            }).AddRoles<IdentityRole>().AddEntityFrameworkStores<UserContext>();
+            }).AddEntityFrameworkStores<UserContext>();
+
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+                options.SlidingExpiration = true;
+                options.AccessDeniedPath = "/api/APIUser/AccessDenied";
+            });
 
             // ++++++++++++++++++++++++++++++++++++++++++++++++++++
             builder.Services.AddCors(options =>
