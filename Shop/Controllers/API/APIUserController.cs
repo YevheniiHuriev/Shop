@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Shop.Models;
-using System.Data;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace Shop.Controllers.API
 {
@@ -16,34 +17,34 @@ namespace Shop.Controllers.API
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IConfiguration _config;
         public APIUserController(
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager, IConfiguration config)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _config = config;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(string email, string password)
+        public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            Console.WriteLine("I'm here!!");
-
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if(!ModelState.IsValid)
             {
-                return BadRequest("Email и пароль обязательны.");
+                return BadRequest("Invalid model ...");
             }
 
-            var user = new IdentityUser 
+            var user = new IdentityUser
             {
-                UserName = email,
-                Email = email,
+                UserName = model.Email,
+                Email = model.Email,
                 EmailConfirmed = true
             };
 
-            var result = await _userManager.CreateAsync(user, password);
+            var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
@@ -54,21 +55,27 @@ namespace Shop.Controllers.API
         }
 
         [HttpPost("auth")]
-        public async Task<IActionResult> Auth(string email, string password)
+        public async Task<IActionResult> Auth([FromBody] LoginModel model)
         {
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Email и пароль обязательны.");
+                return BadRequest("Invalid model ...");
             }
-            var result = await _signInManager.PasswordSignInAsync(
-                email,
-                password,
-                isPersistent: false,
-                lockoutOnFailure: false
-                );
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                return BadRequest("Invalid email ...");
+            }
+
+            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+
+            
             if (result.Succeeded)
             {
-                return Ok("Authed successfully ...");
+                var token = GenerateJwtToken(user);
+
+                return Ok(new {Token = token});
             }
             return BadRequest("Invalid email or password ...");
         }
@@ -173,6 +180,28 @@ namespace Shop.Controllers.API
         public async Task<IActionResult> AccessDenied()
         {
             return BadRequest("Cookie Access Denied ...");
+        }
+
+        private string GenerateJwtToken(IdentityUser user)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.Email, user.Email)
+
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_config["Jwt:DurationInMinutes"])),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256),
+                Issuer = _config["Jwt:Issuer"],
+                Audience = _config["Jwt:Audience"]
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
     }
 }
