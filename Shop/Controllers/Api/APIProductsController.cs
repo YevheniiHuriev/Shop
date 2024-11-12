@@ -45,6 +45,11 @@ namespace Shop.Controllers.Api
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromBody] Product product)
         {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             if (product == null)
             {
                 _logger.LogError("CreateProduct: Product object is null.");

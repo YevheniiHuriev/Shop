@@ -74,11 +74,11 @@ namespace Shop.Controllers.API
             if (result.Succeeded)
             {
                 var token = GenerateJwtToken(user);
-
                 return Ok(new {Token = token});
             }
             return BadRequest("Invalid email or password ...");
         }
+
         [Authorize(Roles = "admin")]
         [HttpPost("update")]
         public async Task<IActionResult> Update(string id, IdentityUser user)

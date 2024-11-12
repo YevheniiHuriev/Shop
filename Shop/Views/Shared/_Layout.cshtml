@@ -21,6 +21,7 @@
             <div class="d-flex justify-content-between">
                 <div>
                     <a href="/" class="btn btn-primary">Home</a>
+                    <a href="/html/add_order.html" class="btn btn-primary">Go to Order</a>
                 </div>
                 <div>
                     <span>Hello, @User.Identity.Name</span>
@@ -44,18 +45,6 @@
             <a href="/user/CreateRole" class="btn btn-primary">CreateRole</a>
             <a href="/user/AddRole" class="btn btn-primary">[AssignRole]</a>
             <a href="/user/AssignRole" class="btn btn-primary">AssignRole</a>
-
-        @* <ul class="list-group">
-            <li class="list-group-item">
-                <a href="/products/Create" class="btn btn-success">Create Product</a>
-            </li>
-            <li class="list-group-item">
-                <a href="/products/Update" class="btn btn-warning">Update Product</a>
-            </li>
-            <li class="list-group-item">
-                <a href="/products/Delete" class="btn btn-danger">Delete Product</a>
-            </li>
-        </ul> *@
         }
     </header>
     <div class="container">
@@ -70,6 +59,8 @@
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 </body>

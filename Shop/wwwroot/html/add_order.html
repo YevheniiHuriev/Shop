@@ -1,0 +1,28 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Додати замовлення</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <h1>Додати нове замовлення</h1>
+
+    <form id="orderForm">
+        <label for="totalAmount">Сума замовлення:</label>
+        <input type="number" id="totalAmount" name="totalAmount" required>
+
+        <label for="userId">Ідентифікатор користувача:</label>
+        <input type="text" id="userId" name="userId" required>
+
+        <label for="products">Продукти (JSON масив):</label>
+        <textarea id="products" name="products" required></textarea>
+
+        <button type="submit">Додати замовлення</button>
+    </form>
+
+    <script src="/js/script.js"></script>
+</body>
+</html>
