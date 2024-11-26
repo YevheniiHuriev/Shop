@@ -5,9 +5,9 @@ namespace Shop.Services
 {
     public class ServiceProduct : IServiceProduct
     {
-        private readonly ProductContext _productContext;
+        private readonly ShopContext _productContext;
         private readonly ILogger<ServiceProduct> _logger;
-        public ServiceProduct(ProductContext productContext, ILogger<ServiceProduct> logger)
+        public ServiceProduct(ShopContext productContext, ILogger<ServiceProduct> logger)
         {
             _productContext = productContext;
             _logger = logger;

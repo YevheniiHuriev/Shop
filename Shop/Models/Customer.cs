@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Humanizer;
 
 namespace Shop.Models
 {
-    public class Product
+    public class Customer
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -14,16 +15,8 @@ namespace Shop.Models
         [Required(ErrorMessage = "Name is required")]
         [StringLength(20, MinimumLength = 2, ErrorMessage = "Name is required ... min: 2, max: 20")]
         public string Name { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Price is required ...")]
-        [Range(0.01, 100000.00, ErrorMessage ="min: 0.01, max: 100000.00")]
-        public decimal Price { get; set; } = decimal.Zero;
-
-        [Required(ErrorMessage = ("Description is required"))]
-        [StringLength(1024, MinimumLength = 2, ErrorMessage = "min: 2, max: 1024")]
-        public string Description { get; set; } = string.Empty;
         // Navigation property
         [JsonIgnore] // To fix an error in serializing nested objects
-        public ICollection<OrderProduct>? OrderProducts { get; set; }
+        public ICollection<Order>? Orders { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Shop.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Shop
 {
@@ -14,16 +15,9 @@ namespace Shop
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddScoped<IServiceOrder, ServiceOrder>();
-
-            builder.Services.AddDbContext<OrderContext>(options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-            });
-
             builder.Services.AddScoped<IServiceProduct, ServiceProduct>();
 
-            builder.Services.AddDbContext<ProductContext>(options =>
+            builder.Services.AddDbContext<ShopContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
@@ -71,19 +65,19 @@ namespace Shop
                 };
             });
 
-            // ++++++++++++++++++++++++++++++++++++++++++++++++++++
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll", builder =>
+                options.AddPolicy("AllowSpecificOrigin", builder =>
                 {
                     builder.AllowAnyOrigin()
                            .AllowAnyMethod()
                            .AllowAnyHeader();
                 });
             });
+
+            builder.Services.AddAuthorization();
      
             builder.Services.AddControllers();
-            // ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddMvc();
@@ -103,9 +97,8 @@ namespace Shop
             }
 
             app.UseRouting();
-            // ++++++++++++++++++++++++++++++++++++++++++++++++++++
-            app.UseCors("AllowAll");
-            // ++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+            app.UseCors("AllowSpecificOrigin");
 
             app.UseHttpsRedirection();
 
@@ -119,11 +112,7 @@ namespace Shop
                 pattern: "{controller=Home}/{action=Index}/{id?}");
             app.MapRazorPages();
 
-            // ++++++++++++++++++++++++++++++++++++++++++++++++++++
             app.MapControllers();
-            // ++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-            //.WithStaticAssets();
 
             app.Run();
         }
